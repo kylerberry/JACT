@@ -1,8 +1,8 @@
 {
-  "name": "cryptobot",
+  "name": "JACT",
   "version": "1.0.0",
-  "description": "trading bot",
-  "main": "index.js",
+  "description": "Just Another Crypto Trader",
+  "main": "bot.js",
   "scripts": {
     "test": "test",
     "start": "node bot.js"
