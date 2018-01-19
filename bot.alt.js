@@ -9,42 +9,69 @@ TODO:
 'use strict';
 const app = require('express')()
 const config = require('./lib/config')
-const TradingBot = require('./lib/tradingbot')
-const { gdax, CAREFUL_PRODUCTION_GDAX } = require('./lib/gdax')
-const Account = require('./lib/account')
+
+const { gdax, DANGER_LIVE_GDAX_DANGER } = require('./lib/gdax')
+
+// @todo will change later after deprecating other architecture
+// const Strategy = require('./lib/strategies')[config.strategies[0]]
+const Strategy = require('./lib/strategies/MACD')
+const PortfolioManager = require('./lib/PortfolioMangaer')
+const TraderBot = require('./lib/TraderBot')
 
 const server = app.listen(process.env.PORT, () => {
     console.log(">> Cryptobot running on port", server.address().port)
 
-    // get Accounts
-    async function getAccountsAsync() {
+    /**
+     * Bootstraps the portfolio manager
+     * @param {Object} options 
+     * @return {Promise}
+     */
+    async function initPortfolioManagerAsync(options) {
         try {
-            return await gdax.getAccounts()
+            const accounts = await gdax.getAccounts()
+            return new PortfolioManager(accounts, options)
         } catch (err) {
             throw new Error(`>> Could not fetch accounts. Shutting down. #{err}`)
+            process.exit()
         }
     }
 
-    async function getHistoricDataAsync(product, config) {
+    /**
+     * Bootstraps the Strategy
+     * @param {Object} options 
+     * @return {Promise}
+     */
+    async function initStrategyAsync(options) {
         try {
-            return await CAREFUL_PRODUCTION_GDAX.getProductHistoricRates(product, config)
+            const historicData = await DANGER_LIVE_GDAX_DANGER.getProductHistoricRates(options.product, { granularity: options.granularity })
+            return new Strategy(historicData, options)
         } catch (err) {
             throw new Error(`>> Could not get historic data. Shutting down. ${err}`)
+            process.exit()
         }
     }
 
-    const gdaxAccounts = getAccountsAsync()
-    const historicData = getHistoricDataAsync(config.product, { granularity: config.granularity })
+    /**
+     * Bootstraps the TraderBot with the Strategy and PortfolioManager
+     * @param {} options 
+     * @return void
+     */
+    async function initTraderBotAsync(options) {
+        try {
+            const manager = await initPortfolioManagerAsync(options)
+            const strategy = await initStrategyAsync(options)
 
-    const portfolio = new PortfolioManager(gdaxAccounts)
-    const macdStrategy = new Strategy(historicData)
-    const traderBot = new TradingBot({
-        strategy: macdStrategy,
-        portfolio: portfolio
-    })
+            const bot = new TraderBot({
+                strategy,
+                manager
+            })
 
-    traderBot.startTrading({
-        product: config.product,
-        granularity: config.granularity
-    })
+            bot.startTrading()
+        } catch (err) {
+            throw new Error(`>> Could not get historic data. Shutting down. ${err}`)
+            process.exit()
+        }
+    }
+
+    initTraderBotAsync(config)
 })
