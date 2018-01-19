@@ -14,7 +14,7 @@ const PortfolioManager = require('./lib/PortfolioManager')
 const TraderBot = require('./lib/TraderBot')
 
 const server = app.listen(process.env.PORT, () => {
-    console.log(">> Cryptobot running on port", server.address().port)
+    console.log(">> JACT running on port", server.address().port)
 
     /**
      * Bootstraps the portfolio manager
@@ -58,7 +58,8 @@ const server = app.listen(process.env.PORT, () => {
 
             const bot = new TraderBot({
                 strategy,
-                manager
+                manager,
+                options
             })
 
             bot.startTrading()
