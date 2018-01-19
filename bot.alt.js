@@ -1,14 +1,14 @@
 /*
-TODO:
+New architecture
 
+TODO:
 - ability to combine strategies?
 - spot reversals, bearish vs bullish trends
 - write trades to CSV
-- look into arbitrage opportunities
 */
 'use strict';
 const app = require('express')()
-const options = require('./lib/cl-args')()
+const config = require('./lib/config')
 const TradingBot = require('./lib/tradingbot')
 const { gdax, CAREFUL_PRODUCTION_GDAX } = require('./lib/gdax')
 const Account = require('./lib/account')
@@ -25,16 +25,16 @@ const server = app.listen(process.env.PORT, () => {
         }
     }
 
-    async function getHistoricDataAsync(product, options) {
+    async function getHistoricDataAsync(product, config) {
         try {
-            return await CAREFUL_PRODUCTION_GDAX.getProductHistoricRates(product, options)
+            return await CAREFUL_PRODUCTION_GDAX.getProductHistoricRates(product, config)
         } catch (err) {
             throw new Error(`>> Could not get historic data. Shutting down. ${err}`)
         }
     }
 
     const gdaxAccounts = getAccountsAsync()
-    const historicData = getHistoricDataAsync(options.product, { granularity: options.granularity })
+    const historicData = getHistoricDataAsync(config.product, { granularity: config.granularity })
 
     const portfolio = new PortfolioManager(gdaxAccounts)
     const macdStrategy = new Strategy(historicData)
@@ -44,7 +44,7 @@ const server = app.listen(process.env.PORT, () => {
     })
 
     traderBot.startTrading({
-        product: options.product,
-        granularity: options.granularity
+        product: config.product,
+        granularity: config.granularity
     })
 })

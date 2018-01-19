@@ -8,8 +8,9 @@ TODO:
 */
 'use strict';
 const app = require('express')()
-const options = require('./lib/cl-args')()
+const config = require('./lib/config')
 const TradingBot = require('./lib/tradingbot')
+const strategies = require('./lib/strategies')
 const { gdax } = require('./lib/gdax')
 const Account = require('./lib/account')
 
@@ -18,13 +19,13 @@ const server = app.listen(process.env.PORT, () => {
 
     gdax.getAccounts((err, res, data) => {
         let trader = new TradingBot({
-            strategy: options.strategy,
+            strategy: strategies[config.strategies[0]], //temporary until bot.alt is live
             account: new Account(data)
         })
 
         trader.startTrading({
-            product: options.product,
-            granularity: options.granularity
+            product: config.product,
+            granularity: config.granularity
         })
     })
 })

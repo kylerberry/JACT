@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "test",
-    "run": "node bot.js"
+    "start": "node bot.js"
   },
   "author": "kyler berry",
   "license": "ISC",
