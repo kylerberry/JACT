@@ -15,7 +15,7 @@ const { gdax, DANGER_LIVE_GDAX_DANGER } = require('./lib/gdax')
 // @todo will change later after deprecating other architecture
 // const Strategy = require('./lib/strategies')[config.strategies[0]]
 const Strategy = require('./lib/strategies/MACD')
-const PortfolioManager = require('./lib/PortfolioMangaer')
+const PortfolioManager = require('./lib/PortfolioManager')
 const TraderBot = require('./lib/TraderBot')
 
 const server = app.listen(process.env.PORT, () => {
