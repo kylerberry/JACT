@@ -1,10 +1,5 @@
 /*
 New architecture
-
-TODO:
-- ability to combine strategies?
-- spot reversals, bearish vs bullish trends
-- write trades to CSV
 */
 'use strict';
 const app = require('express')()
@@ -31,7 +26,7 @@ const server = app.listen(process.env.PORT, () => {
             const accounts = await gdax.getAccounts()
             return new PortfolioManager(accounts, options)
         } catch (err) {
-            throw new Error(`>> Could not fetch accounts. Shutting down. #{err}`)
+            throw new Error(`>> Could not initialize PortfolioManager. Shutting down. #{err}`)
             process.exit()
         }
     }
@@ -46,7 +41,7 @@ const server = app.listen(process.env.PORT, () => {
             const historicData = await DANGER_LIVE_GDAX_DANGER.getProductHistoricRates(options.product, { granularity: options.granularity })
             return new Strategy(historicData, options)
         } catch (err) {
-            throw new Error(`>> Could not get historic data. Shutting down. ${err}`)
+            throw new Error(`>> Could not initialize Strategy. Shutting down. ${err}`)
             process.exit()
         }
     }
@@ -68,7 +63,7 @@ const server = app.listen(process.env.PORT, () => {
 
             bot.startTrading()
         } catch (err) {
-            throw new Error(`>> Could not get historic data. Shutting down. ${err}`)
+            throw new Error(`>> Could not initialize TraderBot. Shutting down. ${err}`)
             process.exit()
         }
     }
