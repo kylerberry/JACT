@@ -1,0 +1,51 @@
+# --- REQUIRED:
+# --- GDAX Authentication
+gdax_auth:
+  key: someKey
+  secret: someSecret
+  passphrase: somePassphrase
+
+# --- OPTIONAL:
+# --- GDAX Authentication for SANDBOX environment
+# --- MUST be set if `sandbox: true`
+gdax_sandbox_auth:
+  key: someKey
+  secret: someSecret
+  passphrase: somePassphrase
+
+# --- REQUIRED:
+# --- trade indicator to use
+# --- options: [macd]
+strategies:
+  - macd
+
+# --- REQUIRED:
+# --- trade/analyze interval in seconds
+# --- options: [60, 300, 900, 3600, 21600, 86400]
+granularity: 300
+
+# --- REQUIRED: 
+# --- product to trade
+# --- options: [LTC-USD, BTC-USD, ETH-USD]
+product: LTC-USD
+
+# --- OPTIONAL:
+# --- Run bot in a test environment (monopoly money)
+sandbox: false
+
+# --- OPTIONAL:
+# --- Maximum trading funds allowed, defaults to 100
+# --- ** some trades will not succeed if the trade size is too small, don't set maxFunds too low
+maxFunds: 100
+
+# --- OPTIONAL:
+# --- The desired stop loss percentage, defaults to the 30-day volatility % for the product
+stopLoss: .08
+
+# --- OPTIONAL:
+# --- Output transactions to a .csv, defaults to false
+reports: false
+
+# --- OPTIONAL:
+# --- Not implemented. Cost average instead of selling at a loss
+costAverage: false
