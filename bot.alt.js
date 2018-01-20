@@ -26,13 +26,9 @@ const server = app.listen(process.env.PORT, () => {
      * @return {Promise}
      */
     async function initPortfolioManagerAsync(options) {
-        try {
-            const accounts = await gdax.getAccounts()
-            return new PortfolioManager(accounts, options)
-        } catch (err) {
-            throw new Error(`>> Could not initialize PortfolioManager. Shutting down. #{err}`)
-            process.exit()
-        }
+        const accounts = await gdax.getAccounts()
+            .catch(err => { throw new Error(err) })
+        return new PortfolioManager(accounts, options)
     }
 
     /**
@@ -41,13 +37,9 @@ const server = app.listen(process.env.PORT, () => {
      * @return {Promise}
      */
     async function initStrategyAsync(options) {
-        try {
-            const historicData = await DANGER_LIVE_GDAX_DANGER.getProductHistoricRates(options.product, { granularity: options.granularity })
-            return new Strategy(historicData, options)
-        } catch (err) {
-            throw new Error(`>> Could not initialize Strategy. Shutting down. ${err}`)
-            process.exit()
-        }
+        const historicData = await DANGER_LIVE_GDAX_DANGER.getProductHistoricRates(options.product, { granularity: options.granularity })
+            .catch(err => { throw new Error(err) })
+        return new Strategy(historicData, options)
     }
 
     /**
@@ -68,7 +60,7 @@ const server = app.listen(process.env.PORT, () => {
 
             bot.startTrading()
         } catch (err) {
-            throw new Error(`>> Could not initialize TraderBot. Shutting down. ${err}`)
+            console.log(`>> ${err}`)
             process.exit()
         }
     }
