@@ -1,5 +1,9 @@
 /*
 New architecture
+
+@todo implement SlowStoch Strategy + MACD
+MACD signal lines above the histogram then slowstoch buys crossover in oversold territory
+or buy slowStoch crossover when oversold and RSI is < 50, sell on slowStoch crossunder oversold
 */
 'use strict';
 const app = require('express')()
