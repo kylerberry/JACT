@@ -1,31 +1,67 @@
 /*
-TODO:
+New architecture
 
-- ability to combine strategies?
-- spot reversals, bearish vs bullish trends
-- write trades to CSV
-- look into arbitrage opportunities
+@todo implement SlowStoch Strategy + MACD
+MACD signal lines above the histogram then slowstoch buys crossover in oversold territory
+or buy slowStoch crossover when oversold and RSI is < 50, sell on slowStoch crossunder oversold
 */
 'use strict';
 const app = require('express')()
 const config = require('./lib/config')
-const TradingBot = require('./lib/tradingbot')
-const strategies = require('./lib/strategies')
-const { gdax } = require('./lib/gdax')
-const Account = require('./lib/account')
+
+const { gdax, DANGER_LIVE_GDAX_DANGER } = require('./lib/gdax')
+
+const Strategy = require('./lib/strategies/macd')
+const PortfolioManager = require('./lib/PortfolioManager')
+const TraderBot = require('./lib/TraderBot')
 
 const server = app.listen(process.env.PORT, () => {
-    console.log(">> Cryptobot running on port", server.address().port)
+    console.log(">> JACT running on port", server.address().port)
 
-    gdax.getAccounts((err, res, data) => {
-        let trader = new TradingBot({
-            strategy: strategies[config.strategies[0]], //temporary until bot.alt is live
-            account: new Account(data)
-        })
+    /**
+     * Bootstraps the portfolio manager
+     * @param {Object} options 
+     * @return {Promise}
+     */
+    async function initPortfolioManagerAsync(options) {
+        const accounts = await gdax.getAccounts()
+            .catch(err => { throw new Error(err) })
+        return new PortfolioManager(accounts, options)
+    }
 
-        trader.startTrading({
-            product: config.product,
-            granularity: config.granularity
-        })
-    })
+    /**
+     * Bootstraps the Strategy
+     * @param {Object} options 
+     * @return {Promise}
+     */
+    async function initStrategyAsync(options) {
+        const historicData = await DANGER_LIVE_GDAX_DANGER.getProductHistoricRates(options.product, { granularity: options.granularity })
+            .catch(err => { throw new Error(err) })
+        return new Strategy(historicData, options)
+    }
+
+    /**
+     * Bootstraps the TraderBot with the Strategy and PortfolioManager
+     * @param {} options 
+     * @return void
+     */
+    async function initTraderBotAsync(options) {
+        try {
+            const manager = await initPortfolioManagerAsync(options)
+            const strategy = await initStrategyAsync(options)
+
+            const bot = new TraderBot({
+                strategy,
+                manager,
+                options
+            })
+
+            bot.startTrading()
+        } catch (err) {
+            console.log(`>> ${err}`)
+            process.exit()
+        }
+    }
+
+    initTraderBotAsync(config)
 })
