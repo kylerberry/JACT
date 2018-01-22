@@ -15,7 +15,3 @@ __Use JACT at your own risk__
 4. Add more strategies
 5. Ability to combine strategies/indicators
 6. Break Websocket feed into it's own service shared by the other services (bot, manager, strategy)
-7. Write reports to CSV
-8. Implement cost averaging option
-9. Add more strategies
-10. Ability to combine strategies/indicators
