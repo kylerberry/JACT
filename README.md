@@ -9,10 +9,13 @@
 __Use JACT at your own risk__
 
 ### Todo
-1. Finish new architecture, (see bot.alt.js)
-2. Track open/received orders against filled orders by orderId. Bot is confusing manual orders from GDAX gui with it's own
-3. Immediately create a stop loss order when placing a buy at a percentage of the purchase price
-4. Write reports to CSV
-5. Implement cost averaging option
-6. Add more strategies
-7. Ability to combine strategies/indicators
+1. Immediately create a stop loss order when placing a buy at a percentage of the purchase price
+2. Write reports to CSV
+3. Implement cost averaging option
+4. Add more strategies
+5. Ability to combine strategies/indicators
+6. Break Websocket feed into it's own service shared by the other services (bot, manager, strategy)
+7. Write reports to CSV
+8. Implement cost averaging option
+9. Add more strategies
+10. Ability to combine strategies/indicators
