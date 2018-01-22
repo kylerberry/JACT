@@ -11,7 +11,7 @@ const config = require('./lib/config')
 
 const { gdax, DANGER_LIVE_GDAX_DANGER } = require('./lib/gdax')
 
-const Strategy = require('./lib/strategies/macd')
+const Strategy = require('./lib/strategies')[config.strategies[0]]
 const PortfolioManager = require('./lib/PortfolioManager')
 const TraderBot = require('./lib/TraderBot')
 
