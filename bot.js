@@ -16,7 +16,8 @@ const PortfolioManager = require('./lib/PortfolioManager')
 const TraderBot = require('./lib/TraderBot')
 
 const server = app.listen(process.env.PORT, () => {
-    console.log(">> JACT running on port", server.address().port)
+    console.log(`>> JACT running on port ${server.address().port}\n`)
+    console.log(`>> Trading ${config.product} every ${config.granularity} seconds with ${config.strategies.join('+ ')} strategy.\n`)
 
     /**
      * Bootstraps the portfolio manager
