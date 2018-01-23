@@ -9,9 +9,8 @@
 __Use JACT at your own risk__
 
 ### Todo
-1. Immediately create a stop loss order when placing a buy at a percentage of the purchase price
-2. Write reports to CSV
-3. Implement cost averaging option
-4. Add more strategies
-5. Ability to combine strategies/indicators
-6. Break Websocket feed into it's own service shared by the other services (bot, manager, strategy)
+1. Break Websocket feed into it's own service shared by the other services (bot, manager, strategy)
+2. Immediately create a stop loss order when placing a buy at a percentage of the purchase price
+3. Write reports to CSV
+4. Implement cost averaging option
+5. Add more strategies

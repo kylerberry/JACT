@@ -8,16 +8,17 @@ or buy slowStoch crossover when oversold and RSI is < 50, sell on slowStoch cros
 'use strict';
 const app = require('express')()
 const config = require('./lib/config')
+const HistoricDataProvider = require('./lib/HistoricDataProvider')
 
 const { gdax, DANGER_LIVE_GDAX_DANGER } = require('./lib/gdax')
 
-const Strategy = require('./lib/strategies')[config.strategies[0]]
+const Strategy = require('./lib/Strategy')
 const PortfolioManager = require('./lib/PortfolioManager')
 const TraderBot = require('./lib/TraderBot')
 
 const server = app.listen(process.env.PORT, () => {
     console.log(`>> JACT running on port ${server.address().port}\n`)
-    console.log(`>> Trading ${config.product} every ${config.granularity} seconds with ${config.strategies.join('+ ')} strategy.\n`)
+    console.log(`>> Trading ${config.product} every ${config.granularity} seconds with ${config.strategies.join(' + ')} strategy.\n`)
 
     /**
      * Bootstraps the portfolio manager
@@ -31,14 +32,14 @@ const server = app.listen(process.env.PORT, () => {
     }
 
     /**
-     * Bootstraps the Strategy
+     * Bootstraps the Data Provider
      * @param {Object} options 
      * @return {Promise}
      */
-    async function initStrategyAsync(options) {
+    async function initHistoricDataAsync(options) {
         const historicData = await DANGER_LIVE_GDAX_DANGER.getProductHistoricRates(options.product, { granularity: options.granularity })
             .catch(err => { throw new Error(err) })
-        return new Strategy(historicData, options)
+            HistoricDataProvider.connect(historicData)
     }
 
     /**
@@ -49,7 +50,8 @@ const server = app.listen(process.env.PORT, () => {
     async function initTraderBotAsync(options) {
         try {
             const manager = await initPortfolioManagerAsync(options)
-            const strategy = await initStrategyAsync(options)
+            await initHistoricDataAsync(options)
+            let strategy = new Strategy(options)
 
             const bot = new TraderBot({
                 strategy,
