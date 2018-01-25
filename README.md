@@ -9,8 +9,12 @@
 __Use JACT at your own risk__
 
 ### Todo
-1. Break Websocket feed into it's own service shared by the other services (bot, manager, strategy)
-2. Immediately create a stop loss order when placing a buy at a percentage of the purchase price
-3. Write reports to CSV
-4. Implement cost averaging option
+1. Break Websocket feed into it's own service
+2. Create better strategies for downtrend protection
+3. Add Backtesting functionality
+4. Write reports to CSV
 5. Add more strategies
+6. Create test scenarios
+7. Add weighting and more configuration for strategies
+8. Better order management (placed, received, filled, canceled)
+9. better get/set for Manager props
