@@ -3,3 +3,5 @@
 node_modules
 config.yaml
 todo.txt
+strategies/private
+strategies/private/*
