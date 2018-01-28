@@ -49,17 +49,14 @@ const server = app.listen(process.env.PORT, () => {
      */
     async function initTraderBotAsync(options) {
         try {
-            console.log('>> Fetching account information...')
+            console.log('>> Fetching account information.')
             const manager = await initPortfolioManagerAsync(options)
-            console.log('>> Success.')
 
-            console.log('>> Fetching historical data...')
+            console.log('>> Fetching historical data.')
             await initHistoricDataAsync(options)
-            console.log('>> Success.')
             
-            console.log('>> Connecting to realtime feed...')
+            console.log('>> Connecting to realtime feed.')
             await FeedService.connect().catch(err => { throw new Error(err) })
-            console.log('>> Success.')
 
             let strategy = new Strategy(options)
             console.log('>> Strategy initialized.\n')
