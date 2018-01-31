@@ -9,10 +9,8 @@
 __Use JACT at your own risk__
 
 ### Todo
-3. Better order management (placed, received, filled, canceled)
-4. Add Backtesting functionality
-5. Write reports to CSV
-6. Add more strategies
-7. Create test scenarios
-8. Add weighting and more configuration for strategies
-9. better get/set for Manager props
+1. Unit Tests
+2. Add Backtesting
+3. Write reports to CSV
+4. Add more strategies
+5. Add weighting and more configuration for strategies

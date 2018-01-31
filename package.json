@@ -4,7 +4,7 @@
   "description": "Just Another Crypto Trader",
   "main": "bot.js",
   "scripts": {
-    "test": "test",
+    "test": "ava",
     "start": "node bot.js"
   },
   "author": "kyler berry",
@@ -20,5 +20,8 @@
     "moment": "^2.20.1",
     "technicalindicators": "^1.0.21",
     "ws": "^4.0.0"
+  },
+  "devDependencies": {
+    "ava": "^0.25.0"
   }
 }
