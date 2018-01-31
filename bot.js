@@ -15,10 +15,14 @@ const { gdax, DANGER_LIVE_GDAX_DANGER } = require('./lib/gdax')
 const Strategy = require('./lib/Strategy')
 const PortfolioManager = require('./lib/PortfolioManager')
 const TraderBot = require('./lib/TraderBot')
+const FeedService = require('./lib/FeedService')
+
+let Spinner = require('cli-spinner').Spinner
+let spinner = new Spinner('working... %s')
+spinner.setSpinnerString(0);
 
 const server = app.listen(process.env.PORT, () => {
     console.log(`>> JACT running on port ${server.address().port}\n`)
-    console.log(`>> Trading ${config.product} every ${config.granularity} seconds with ${config.strategies.join(' + ')} strategy.\n`)
 
     /**
      * Bootstraps the portfolio manager
@@ -49,9 +53,23 @@ const server = app.listen(process.env.PORT, () => {
      */
     async function initTraderBotAsync(options) {
         try {
+            console.log('>> Fetching account information.')
+            spinner.start()
             const manager = await initPortfolioManagerAsync(options)
+            spinner.stop(true)
+
+            console.log('>> Fetching historical data.')
+            spinner.start()
             await initHistoricDataAsync(options)
+            spinner.stop(true)
+            
+            console.log('>> Connecting to realtime feed. This may take a few moments.')
+            spinner.start()
+            await FeedService.connect().catch(err => { throw new Error(err) })
+            spinner.stop(true)
+
             let strategy = new Strategy(options)
+            console.log('>> Strategy initialized.\n')
 
             const bot = new TraderBot({
                 strategy,
