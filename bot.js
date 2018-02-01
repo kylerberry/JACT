@@ -24,13 +24,6 @@ spinner.setSpinnerString(0);
 const server = app.listen(process.env.PORT, () => {
     console.log(`>> JACT running on port ${server.address().port}\n`)
 
-    try {
-        let strategy = new Strategy(config)
-    } catch (err) {
-        console.log(`>> ${err}`)
-    }
-    
-
     /**
      * Bootstraps the portfolio manager
      * @param {Object} options 
