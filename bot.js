@@ -32,6 +32,9 @@ const server = app.listen(process.env.PORT, () => {
     async function initPortfolioManagerAsync(options) {
         const accounts = await gdax.getAccounts()
             .catch(err => { throw new Error(err) })
+            if (accounts.message) {
+                throw new Error(accounts.message)
+            }
         return new PortfolioManager(accounts, options)
     }
 
@@ -41,9 +44,12 @@ const server = app.listen(process.env.PORT, () => {
      * @return {Promise}
      */
     async function initHistoricDataAsync(options) {
-        const historicData = await DANGER_LIVE_GDAX_DANGER.getProductHistoricRates(options.product, { granularity: options.granularity })
+        const data = await DANGER_LIVE_GDAX_DANGER.getProductHistoricRates(options.product, { granularity: options.granularity })
             .catch(err => { throw new Error(err) })
-            HistoricDataProvider.connect(historicData)
+            if (data.message) {
+                throw new Error(data.message)
+            }
+            HistoricDataProvider.connect(data)
     }
 
     /**
@@ -79,6 +85,7 @@ const server = app.listen(process.env.PORT, () => {
 
             bot.startTrading()
         } catch (err) {
+            spinner.stop(true)
             console.log(`>> ${err}`)
             process.exit()
         }
