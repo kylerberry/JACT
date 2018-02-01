@@ -6,12 +6,11 @@ gdax_auth:
     secret: someSecret
     passphrase: somePassphrase
 
-# REQUIRED:
-# trade indicator to use
-# options: [macd, slowStochastic, rsi]
-strategies:
-    - slowStochastic
-    - rsi
+# REQUIRED
+# filename of your strategy file OR of an already provided strategy the .js ext is optional
+# the bot will always look relative to the ./lib/strategies directory
+# ex: my-strategy, bestStrategy.js, macd, rsi
+strategy: macd
 
 # REQUIRED:
 # trade/analyze interval in seconds
@@ -24,22 +23,25 @@ granularity: 60
 product: LTC-USD
 
 # REQUIRED:
-# create a stop loss of the provided percentage, if not defined, the 24hr low will be used
+# create a stop loss of the provided percentage.
 stopLoss: .05
 
 # OPTIONAL:
 # GDAX Authentication for SANDBOX environment
 # MUST be set if `sandbox: true`
-gdax_sandbox_auth:
-    key: someKey
-    secret: someSecet
-    passphrase: somePassphrase
+#
+# gdax_sandbox_auth:
+#     key: someKey
+#     secret: someSecret
+#     passphrase: somePassphrase
 
 # OPTIONAL:
-# Run bot in a test environment (monopoly money)
-sandbox: true
+# Run bot in a test environment
+#
+# sandbox: true
 
 # OPTIONAL:
 # Maximum trading funds allowed, defaults to 95% wallet amount (to leave room for fees)
 # ** some trades will not succeed if the trade size is too small, don't set maxFunds too low
-maxFunds: 100
+#
+# maxFunds: 100
