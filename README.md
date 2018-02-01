@@ -14,3 +14,4 @@ __Use JACT at your own risk__
 3. Write reports to CSV
 4. Add more strategies
 5. Add weighting and more configuration for strategies
+6. Find out why indicators take roughly 5 passes before the indicators start to become reliable

@@ -5,7 +5,7 @@
   "main": "bot.js",
   "scripts": {
     "test": "ava",
-    "start": "node bot.js"
+    "jact": "node bot.js"
   },
   "author": "kyler berry",
   "license": "ISC",
