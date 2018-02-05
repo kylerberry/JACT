@@ -12,23 +12,36 @@ For example if the strategy signals LONG for 1 BTC, but only gets partially fill
 #### Stop Loss
 JACT will constantly monitor the current price and compare it against any open position. If the current price falls below the `config.stopLoss` percentage it will immediately place a market sell order (has taker fee)
 
-### How to use
+#### Backtesting
+JACT has a basic backtesting feature. You can test your strategy against historical data of the dates you provide in `config.backtest.start_date` & `config.backtest.end_date` It does not take into account slippage, fees, or order averaging.
+
+### How to: Trade
+_*JACT is in early development. You may experience bugs. TRADE AT YOUR OWN RISK*
 - `npm install`
 - configure `config.yaml` _*see sample.config.yaml*_
 - `npm run jact`
 - Have fun getting JACT!
 
-### Run tests
-`npm test`
+### How to: Backtest
+_*Backtesting is an early feature. You may experience bugs*
+
+- configure `config.yaml` _*see sample.config.yaml*_
+- `npm run backtest`
 
 _*test coverage is still in progress*_
 ### Todo
-1. Add Backtesting
-2. Write reports to CSV
-3. Add more strategies
-4. Add weighting and more configuration for strategies
-5. Find out why indicators take roughly 5 periods before they start to become reliable
-6. Remove unecessary class constructors
+1. Write reports to CSV
+2. Add more strategies
+3. Add weighting and more configuration for strategies
+4. Remove unecessary class constructors
+
+### CONTRIBUTING
+Please link to or create an issue for any pull-request you plan to submit as well as unit tests. Issues should be as detailed as possible and include a screenshot of JACT's console output when necessary.
+
+Run tests with
+- `npm test`
+
+===============
 
 If you've enjoyed JACT, feel free to throw me some change:
 - LTC: Le7yGJZtKCXekkyv92DS8yi4ne3Ap34W1m

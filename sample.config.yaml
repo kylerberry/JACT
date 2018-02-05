@@ -45,3 +45,10 @@ stopLoss: .05
 # ** some trades will not succeed if the trade size is too small, don't set maxFunds too low
 #
 # maxFunds: 100
+
+# OPTIONAL:
+# Dates for backtesting. if end_date is not set, today's date will be used
+# format must be ISO8601. ex: 2018-02-04T12:00:00Z
+# backtest: 
+#     start_date: null
+#     end_date: null

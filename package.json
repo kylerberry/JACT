@@ -5,11 +5,13 @@
   "main": "bot.js",
   "scripts": {
     "test": "ava",
-    "jact": "node bot.js"
+    "jact": "node bot.js",
+    "backtest": "node backtest.js"
   },
   "author": "kyler berry",
   "license": "ISC",
   "dependencies": {
+    "ascii-progress": "^1.0.5",
     "cli-spinner": "^0.2.7",
     "dotenv": "^4.0.0",
     "express": "^4.16.2",
