@@ -4,3 +4,4 @@ node_modules
 config.yaml
 todo.txt
 lib/strategies/private.*.js
+backtest_results

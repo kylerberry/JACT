@@ -21,6 +21,7 @@
     "lodash": "^4.17.4",
     "moment": "^2.20.1",
     "node-notifier": "^5.2.1",
+    "regression": "^2.0.1",
     "technicalindicators": "^1.0.21",
     "ws": "^4.0.0"
   },
