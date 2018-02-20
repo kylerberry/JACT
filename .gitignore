@@ -1,5 +1,7 @@
 .DS_STORE
 .env
+.nyc_output
+coverage
 node_modules
 config.yaml
 todo.txt
