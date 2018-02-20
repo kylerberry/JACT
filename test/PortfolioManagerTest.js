@@ -96,48 +96,6 @@ test('PortfolioManager.getAvgLoss', t => {
     t.is(parseFloat(managerTwo.getAvgLoss().percent), -17)
 })
 
-test('PortfolioManager.getAvgLoss', t => {
-
-    // test full trades
-    let fills = [{
-        side: 'buy',
-        size: '1',
-        price: '100'
-    },
-    {
-        side: 'sell',
-        size: '1',
-        price: '90'
-    }]
-
-    const manager = getManagerInstance()
-    fills.forEach(trade => manager.addFilled(trade))
-    t.is(parseFloat(manager.getAvgLoss().usd), -10)
-    t.is(parseFloat(manager.getAvgLoss().percent), -10)
-
-    // test partially filled trades
-    fills = [{
-        side: 'buy',
-        size: 1,
-        price: '100'
-    },
-    {
-        side: 'sell',
-        size: .3,
-        price: '90'
-    },
-    {
-        side: 'sell',
-        size: .7,
-        price: '80'
-    }]
-
-    const managerTwo = getManagerInstance()
-    fills.forEach(trade => managerTwo.addFilled(trade))
-    t.is(parseFloat(managerTwo.getAvgLoss().usd), -17)
-    t.is(parseFloat(managerTwo.getAvgLoss().percent), -17)
-})
-
 test('PortfolioManager.getCurrentRemainingPositionSize', t => {
     const manager = getManagerInstance()
     manager.addFilled({
