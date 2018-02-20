@@ -95,3 +95,27 @@ test('PortfolioManager.getAvgLoss', t => {
     t.is(parseFloat(managerTwo.getAvgLoss().usd), -17)
     t.is(parseFloat(managerTwo.getAvgLoss().percent), -17)
 })
+
+test('PortfolioManager.getCurrentRemainingPositionSize', t => {
+    const manager = getManagerInstance()
+    manager.addFilled({
+        side: 'buy',
+        size: '1',
+        price: '100'
+    })
+    t.is(manager.getCurrentRemainingPositionSize(), 1)
+
+    manager.addFilled({
+        side: 'sell',
+        size: '.3',
+        price: '110',
+    })
+    t.is(manager.getCurrentRemainingPositionSize(), .7)
+
+    manager.addFilled({
+        side: 'sell',
+        size: '.7',
+        price: '110',
+    })
+    t.is(manager.getCurrentRemainingPositionSize(), 0)
+})
