@@ -1,9 +1,14 @@
 const test = require('ava');
 const PortfolioManager = require('../lib/PortfolioManager')
+const extend = require('lodash/extend')
 
 const getManagerInstance = (params = {}) => {
-    let accounts = params.accounts ? params.accounts : [{ currency: 'USD' }, { currency: 'LTC' }]
-    let options = params.options ? params.options : {product: 'LTC-USD'}
+    let defaultAccounts = [{ currency: 'USD' }, { currency: 'LTC'}]
+    let defaultOptions = { product: 'LTC-USD' }
+
+    let accounts = params.accounts ? params.accounts : defaultAccounts;
+    let options = extend({}, params.options, defaultOptions);
+
     return new PortfolioManager(accounts, options)
 }
 
@@ -12,7 +17,7 @@ test('PortfolioManager initializes', t => {
     t.is(manager instanceof PortfolioManager, true);
 })
 
-test('PortfolioManager.getAvgWin', t => {
+test('getAvgWin', t => {
 
     // test full trades
     let fills = [{
@@ -54,7 +59,7 @@ test('PortfolioManager.getAvgWin', t => {
     t.is(parseFloat(managerTwo.getAvgWin().percent), 6.5)
 })
 
-test('PortfolioManager.getAvgLoss', t => {
+test('getAvgLoss', t => {
 
     // test full trades
     let fills = [{
@@ -96,7 +101,7 @@ test('PortfolioManager.getAvgLoss', t => {
     t.is(parseFloat(managerTwo.getAvgLoss().percent), -17)
 })
 
-test('PortfolioManager.getCurrentRemainingPositionSize', t => {
+test('getCurrentRemainingPositionSize', t => {
     const manager = getManagerInstance()
     manager.addFilled({
         side: 'buy',
@@ -118,4 +123,72 @@ test('PortfolioManager.getCurrentRemainingPositionSize', t => {
         price: '110',
     })
     t.is(manager.getCurrentRemainingPositionSize(), 0)
+})
+
+test('shouldTriggerStop', t => {
+    const manager = getManagerInstance({
+        options: {
+            stopLoss: .05
+        }
+    })
+
+    manager.addFilled({
+        side: 'buy',
+        size: '1',
+        price: '100'
+    })
+
+    t.is(manager.shouldTriggerStop(94.99), true)
+    t.is(manager.shouldTriggerStop(95.00), true)
+    t.is(manager.shouldTriggerStop(95.01), false)
+})
+
+test('isBidAllowed', t => {
+    const manager = getManagerInstance({
+        options: {
+            allowedSlippage: .01
+        }
+    })
+
+    let signaledPrice = 100
+    let bestBid = 101
+
+    t.is(manager.isBidAllowed(100, 101), true)
+    t.is(manager.isBidAllowed(100, 101.01), false)
+    t.is(manager.isBidAllowed(100, 100.10), true)
+})
+
+test('getFundingAmount', t => {
+    // with maxFunds config
+    const manager = getManagerInstance({
+        accounts: [{ currency: 'USD', available: 10 }],
+        options: { maxFunds: 5 }
+    })
+
+    t.is(manager.getFundingAmount(), 5)
+
+    // without maxFunds config
+    const managerTwo = getManagerInstance({
+        accounts: [{ currency: 'USD', available: 10 }],
+    })
+
+    t.is(managerTwo.getFundingAmount(), 10)
+})
+
+test('getOrderSize', t => {
+    //with maxFunds config
+    const manager = getManagerInstance({
+        accounts: [{ currency: 'USD', available: 100 }],
+        options: { maxFunds: 50 }
+    })
+
+    let currentPrice = 100
+    t.is(manager.getOrderSize(currentPrice), '0.50000000')
+
+    // without maxFunds config
+    const managerTwo = getManagerInstance({
+        accounts: [{ currency: 'USD', available: 100 }]
+    })
+
+    t.is(managerTwo.getOrderSize(currentPrice), '1.00000000')
 })
