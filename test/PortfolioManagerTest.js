@@ -117,7 +117,6 @@ test('getAvgLoss', t => {
 
     const managerTwo = getManagerInstance()
     fills.forEach(trade => managerTwo.addFilled(trade))
-    console.log(managerTwo.getAvgLoss())
     t.is(managerTwo.getAvgLoss().usd, '-17.0000')
     t.is(managerTwo.getAvgLoss().percent, '-0.1700')
 })
