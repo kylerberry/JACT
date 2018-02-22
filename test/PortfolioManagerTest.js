@@ -19,44 +19,54 @@ test('PortfolioManager initializes', t => {
 
 test('getAvgWin', t => {
 
-    // test full trades
+    // test full trades, multiple wins, complex sizes
     let fills = [{
         side: 'buy',
-        size: '1',
-        price: '100'
+        size: '2.27262397',
+        price: 220.01
     },
     {
         side: 'sell',
-        size: '1',
-        price: '110'
+        size: '2.27262397',
+        price: 223.43
+    },
+    {
+        side: 'buy',
+        size: '3.27262397',
+        price: 220.01
+    },
+    {
+        side: 'sell',
+        size: '3.27262397',
+        price: 223.43
     }]
 
     const manager = getManagerInstance()
     fills.forEach(trade => manager.addFilled(trade))
-    t.is(parseFloat(manager.getAvgWin().usd), 10)
-    t.is(parseFloat(manager.getAvgWin().percent), 10)
+    t.is(manager.getAvgWin().usd, '9.4824')
+    t.is(manager.getAvgWin().percent, '0.0155')
 
     // test partially filled trades
     fills = [{
         side: 'buy',
-        size: 1,
+        size: 1.3,
         price: '100'
     },
     {
         side: 'sell',
-        size: .3,
+        size: .2,
         price: '110'
     },
     {
         side: 'sell',
-        size: .7,
+        size: 1.1,
         price: '105'
     }]
 
     const managerTwo = getManagerInstance()
     fills.forEach(trade => managerTwo.addFilled(trade))
-    t.is(parseFloat(managerTwo.getAvgWin().usd), 6.5)
-    t.is(parseFloat(managerTwo.getAvgWin().percent), 6.5)
+    t.is(managerTwo.getAvgWin().usd, '7.5000')
+    t.is(managerTwo.getAvgWin().percent, '0.0577')
 })
 
 test('getAvgLoss', t => {
@@ -64,19 +74,29 @@ test('getAvgLoss', t => {
     // test full trades
     let fills = [{
         side: 'buy',
-        size: '1',
-        price: '100'
+        size: '2.27262397',
+        price: 220.01
     },
     {
         side: 'sell',
-        size: '1',
-        price: '90'
+        size: '2.27262397',
+        price: 217.43
+    },
+    {
+        side: 'buy',
+        size: '3.27262397',
+        price: 220.01
+    },
+    {
+        side: 'sell',
+        size: '3.27262397',
+        price: 200.43
     }]
 
     const manager = getManagerInstance()
     fills.forEach(trade => manager.addFilled(trade))
-    t.is(parseFloat(manager.getAvgLoss().usd), -10)
-    t.is(parseFloat(manager.getAvgLoss().percent), -10)
+    t.is(manager.getAvgLoss().usd, '-34.9707')
+    t.is(manager.getAvgLoss().percent, '-0.0504')
 
     // test partially filled trades
     fills = [{
@@ -97,8 +117,9 @@ test('getAvgLoss', t => {
 
     const managerTwo = getManagerInstance()
     fills.forEach(trade => managerTwo.addFilled(trade))
-    t.is(parseFloat(managerTwo.getAvgLoss().usd), -17)
-    t.is(parseFloat(managerTwo.getAvgLoss().percent), -17)
+    console.log(managerTwo.getAvgLoss())
+    t.is(managerTwo.getAvgLoss().usd, '-17.0000')
+    t.is(managerTwo.getAvgLoss().percent, '-0.1700')
 })
 
 test('getCurrentRemainingPositionSize', t => {
