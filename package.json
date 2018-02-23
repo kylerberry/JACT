@@ -13,8 +13,6 @@
   "license": "ISC",
   "dependencies": {
     "ascii-progress": "^1.0.5",
-    "cli-spinner": "^0.2.7",
-    "dotenv": "^4.0.0",
     "express": "^4.16.2",
     "gdax": "github:coinbase/gdax-node",
     "gdax-trading-toolkit": "^0.2.1",
@@ -31,5 +29,10 @@
     "ava": "^0.25.0",
     "coveralls": "^3.0.0",
     "nyc": "^11.4.1"
+  },
+  "ava": {
+    "files": [
+      "test/ConfigProviderTest.js"
+    ]
   }
 }
