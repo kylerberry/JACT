@@ -2,27 +2,12 @@ const test =  require('ava');
 const TraderBot = require('../lib/TraderBot')
 const PortfolioManager = require('../lib/PortfolioManager')
 const Strategy = require('../lib/Strategy')
+const CandleProvider = require('../lib/CandleProvider')
 const extend = require('lodash/extend')
 const sinon = require('sinon')
-// import sinon from 'sinon';
 
-// test.beforeEach(t => {
-// 	t.context.log = sinon.spy();
-// });
-
-// test.afterEach(t => {
-// 	t.context.log.restore();
-// });
-
-// test('first', t => {
-// 	t.context.log('first');
-// 	t.true(t.context.log.calledOnce);
-// });
-
-// test('second', t => {
-// 	t.context.log('second');
-// 	t.true(t.context.log.calledOnce);
-// });
+// @TODO look into using macros to reproduce some functionality
+// @TODO maybe break some tests into smaller units
 
 // mock Strategy
 const getStrategyInstance = (params = {}) => {
@@ -80,7 +65,7 @@ test('stopLosses', t => {
 	// places the order
 	t.true(trader.placeOrder.calledOnce)
 
-	// a filled sell (no position)
+	// a filled sell (no remaining position)
 	trader.manager.addFilled({
 		side: 'sell',
 		size: '1.5',
@@ -107,9 +92,167 @@ test('stopLosses', t => {
 		price: 180
 	})
 
-	// test that it cancels an open order
-	let spy = sinon.spy()
-	trader.cancelOrder = spy
+	// test that it cancels the open order
+	trader.cancelOrder = sinon.spy()
 	trader.stopLosses()
-	t.true(spy.withArgs(123).calledOnce)
+	t.true(trader.cancelOrder.withArgs(123).calledOnce)
+})
+
+test('openHandler', t => {
+	let trader = getTraderInstance()
+
+	// 'open' event comes down the feed
+	trader.orderPlaced = true
+	trader.openHandler({
+		order_id: 123,
+		side: 'buy',
+		price: 129,
+		size: '1.5'
+	})
+
+	t.is(trader.manager.getOpen(123).price, 129)
+
+	// if an externally placed order (manually through gdax web ui)
+	// ignore the event
+	trader.orderPlaced = false
+	trader.openHandler({
+		order_id: 999,
+		side: 'buy',
+		price: 129,
+		size: '1.5'
+	})
+
+	t.falsy(trader.manager.getOpen(999))
+})
+
+test('matchHandler', t => {
+	let trader = getTraderInstance()
+
+	// 'match' event comes down the feed
+	trader.orderPlaced = true
+	trader.matchHandler({
+		order_id: 123,
+		side: 'buy',
+		price: 129,
+		size: '1.5'
+	})
+	t.is(trader.manager.getRemainingPositionSize(), 1.5)
+
+	// if an externally placed order (manually through gdax web ui)
+	// ignore the event
+	trader.orderPlaced = false
+	trader.matchHandler({
+		order_id: 999,
+		side: 'buy',
+		price: 129,
+		size: '1.5'
+	})
+	t.is(trader.manager.getRemainingPositionSize(), 1.5)
+
+	// sell match trade removes out existing position
+	trader.orderPlaced = true
+	trader.matchHandler({
+		order_id: 123,
+		side: 'sell',
+		price: 129,
+		size: '1.5'
+	})
+	t.is(trader.manager.getRemainingPositionSize(), 0)
+})
+
+test('doneHandler', t => {
+	let trader = getTraderInstance()
+
+	// completely filled buy
+	trader.orderPlaced = true
+	trader.manager.removeOpen = sinon.spy()
+	trader.resetFlags = sinon.spy()
+	trader.doneHandler({
+		order_id: 123,
+		side: 'buy',
+		price: 129,
+		size: '1.5',
+		remaining_size: '0',
+		reason: 'filled'
+	})
+	t.truthy(trader.manager.removeOpen.withArgs(123).calledOnce)
+	t.truthy(trader.resetFlags.calledOnce)
+
+	// ignored if fired from external event
+	trader.orderPlaced = false
+	trader.doneHandler({
+		order_id: 234,
+		side: 'buy',
+		price: 129,
+		size: '1.5',
+		remaining_size: '0',
+		reason: 'filled'
+	})
+	// removeOpen was not called again
+	t.is(trader.manager.removeOpen.callCount, 1)
+
+	// partially filled sell
+	trader.orderPlaced = true
+	trader.shouldReplaceOrder = () => true
+	trader.doneHandler({
+		order_id: 345,
+		side: 'sell',
+		price: 130,
+		size: '1.2',
+		remaining_size: '0.3',
+		reason: 'filled'
+	})
+	t.truthy(trader.placeOrder.withArgs({
+		side: 'sell',
+		size: .3,
+		price: 129.75,
+		post_only: true,
+		time_in_force: 'GTT',
+		cancel_after: 'min'
+	}))
+})
+
+test('shouldReplaceOrder', t => {
+	let trader = getTraderInstance()
+
+	let cancelledSell = {
+		side: 'sell',
+		remaining_size: '0.3',
+		reason: 'canceled'
+	}
+
+	trader.manager.isBidAllowed = () => true
+	t.truthy(trader.shouldReplaceOrder(cancelledSell, 100))
+
+	let cancelledBuy = {
+		side: 'buy',
+		remaining_size: '0.3',
+		reason: 'canceled'
+	}
+	t.truthy(trader.shouldReplaceOrder(cancelledBuy, 100))
+
+	let filledBuy = {
+		side: 'buy',
+		remaining_size: '0.3',
+		reason: 'filled'
+	}
+	t.falsy(trader.shouldReplaceOrder(filledBuy, 100))
+
+	let filledSell = {
+		side: 'sell',
+		remaining_size: '0',
+		reason: 'filled'
+	}
+	t.falsy(trader.shouldReplaceOrder(filledSell, 100))
+
+	let filledPartialSell = {
+		side: 'sell',
+		remaining_size: '0.3',
+		reason: 'filled'
+	}
+	t.truthy(trader.shouldReplaceOrder(filledPartialSell, 100))
+
+	// canceled buy but bid is not allowed
+	trader.manager.isBidAllowed = () => false
+	t.falsy(trader.shouldReplaceOrder(cancelledBuy, 100))
 })
