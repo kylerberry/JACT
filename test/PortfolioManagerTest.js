@@ -121,28 +121,28 @@ test('getAvgLoss', t => {
     t.is(managerTwo.getAvgLoss().percent, '-0.1700')
 })
 
-test('getCurrentRemainingPositionSize', t => {
+test('getRemainingPositionSize', t => {
     const manager = getManagerInstance()
     manager.addFilled({
         side: 'buy',
         size: '1',
         price: '100'
     })
-    t.is(manager.getCurrentRemainingPositionSize(), 1)
+    t.is(manager.getRemainingPositionSize(), 1)
 
     manager.addFilled({
         side: 'sell',
         size: '.3',
         price: '110',
     })
-    t.is(manager.getCurrentRemainingPositionSize(), .7)
+    t.is(manager.getRemainingPositionSize(), .7)
 
     manager.addFilled({
         side: 'sell',
         size: '.7',
         price: '110',
     })
-    t.is(manager.getCurrentRemainingPositionSize(), 0)
+    t.is(manager.getRemainingPositionSize(), 0)
 })
 
 test('shouldTriggerStop', t => {
