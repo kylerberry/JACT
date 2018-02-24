@@ -1,24 +1,16 @@
 const test = require('ava');
-const { getManager, PortfolioManager } = require('../lib/PortfolioManager')
+const portfolioManager = require('../lib/PortfolioManager')
 const extend = require('lodash/extend')
 const config = require('../lib/ConfigProvider')
 
 test.beforeEach(t => {
     config._setConfigPath('./test/fixtures/config.yaml')
     config.initFromFile()
-    t.context.manager = new PortfolioManager({ currency: 'USD', available: 10 })
-})
-
-test('PortfolioManager initializes', t => {
-    const manager = new PortfolioManager({ currency: 'USD' })
-    t.truthy(manager instanceof PortfolioManager)
-    t.is(getManager(),  manager)
-    const managerTwo = new PortfolioManager({ currency: 'USD' })
-    t.is(getManager(), managerTwo)
+    portfolioManager.setAccount({ currency: 'USD', available: 10 })
+    t.context.manager = portfolioManager
 })
 
 test('getAvgWin for fully filled trades', t => {
-
     // test full trades, multiple wins, complex sizes
     let fills = [{
         side: 'buy',
@@ -190,7 +182,8 @@ test('getFundingAmount', t => {
 
 test('getOrderSize', t => {
     //with maxFunds config
-    const manager = new PortfolioManager({ currency: 'USD', available: 100 })
+    portfolioManager.setAccount({ currency: 'USD', available: 100 })
+    let manager = t.context.manager
     config.set('max_funds', 50)
 
     let currentPrice = 100
