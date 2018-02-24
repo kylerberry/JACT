@@ -1,11 +1,10 @@
 'use strict';
 const app = require('express')()
-const config = require('./lib/config')
-
-const { gdax, DANGER_LIVE_GDAX_DANGER } = require('./lib/gdax')
-
-const Strategy = require('./lib/Strategy')
-const PortfolioManager = require('./lib/PortfolioManager')
+const find = require('lodash/find')
+const config = require('./lib/ConfigProvider')
+const { gdax } = require('./lib/gdax')
+const strategy = require('./lib/Strategy')()
+const manager = require('./lib/PortfolioManager')
 const BacktestBot = require('./lib/BacktestBot')
 
 const flatten = require('lodash/flatten')
@@ -21,10 +20,10 @@ const server = app.listen(process.env.PORT, () => {
     async function initPortfolioManagerAsync(options) {
         const accounts = await gdax.getAccounts()
             .catch(err => { throw new Error(err) })
-            if (accounts.message) {
-                throw new Error(accounts.message)
-            }
-        return new PortfolioManager(accounts, options)
+        if (accounts.message) {
+            throw new Error(accounts.message)
+        }
+        manager.setAccount(find(accounts, { currency: options.product.split('-')[1] }))
     }
 
     /**
@@ -35,17 +34,12 @@ const server = app.listen(process.env.PORT, () => {
     async function initBacktestBot(options) {
         try {
             console.log('>> Fetching account information.')
-            const manager = await initPortfolioManagerAsync(options)
+            await initPortfolioManagerAsync(options)
 
-            const strategy = new Strategy(options)
+            strategy.set(options.strategy)
             console.log('>> Strategy initialized.\n')
 
-            const bot = new BacktestBot({
-                strategy,
-                manager,
-                options
-            })
-
+            const bot = new BacktestBot()
             bot.startTrading()
         } catch (err) {
             console.log(`>> ${err}`)
@@ -53,5 +47,5 @@ const server = app.listen(process.env.PORT, () => {
         }
     }
 
-    initBacktestBot(config)
+    initBacktestBot(config.get())
 })
