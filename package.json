@@ -6,7 +6,7 @@
   "scripts": {
     "test": "nyc --reporter=html --reporter=text ava",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "jact": "node bot.js",
+    "jact": "node app.js",
     "backtest": "node backtest.js"
   },
   "author": "kyler berry",

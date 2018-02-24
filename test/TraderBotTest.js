@@ -170,6 +170,19 @@ test('doneHandler', t => {
 	// removeOpen was not called again
 	t.truthy(manager.getOpen(234))
 
+	// test not run if stop loss is triggered
+	trader.orderPlaced = true
+	trader.stopLossTriggered = true
+	trader.doneHandler({
+		order_id: 234,
+		side: 'buy',
+		price: 129,
+		size: '1.5',
+		remaining_size: '0',
+		reason: 'filled'
+	})
+	t.truthy(manager.getOpen(234))
+
 	// partially filled sell
 	trader.orderPlaced = true
 	trader.placeOrder = sinon.spy()
