@@ -8,6 +8,24 @@ const strategy = require('./lib/Strategy')()
 const manager = require('./lib/PortfolioManager')
 const { getTrader, TraderBot } = require('./lib/TraderBot')
 const FeedService = require('./lib/FeedService')
+const configRoute = require('./api/routes/config');
+
+// connect routes
+app.use('/config', configRoute);
+
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+	var err = new Error('Not Found');
+	err.status = 404;
+	next(err);
+});
+
+// error handler
+app.use(function (err, req, res, next) {
+	// render the error message
+	res.status(err.status || 500);
+	res.json({ error: err.message });
+});
 
 const server = app.listen(process.env.PORT, () => {
     console.log(`>> JACT running on port ${server.address().port}\n`)

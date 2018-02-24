@@ -54,3 +54,8 @@ test('Set config', t => {
 	}), false)
 	t.is(config.get('gdax_auth_key'), 'someKey')
 })
+
+test('get safe config', t => {
+	t.is(config.get().gdax_auth_key, 'someKey')
+	t.is(config.getSafe().gdax_auth_key, undefined)
+})
