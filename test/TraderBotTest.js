@@ -1,8 +1,9 @@
 const test =  require('ava');
 const config = require('../lib/ConfigProvider')
+const path = require('path')
 
 // gdax calls config really early
-config._setConfigPath('./test/fixtures/config.yaml')
+config._setConfigPath(path.join(__dirname, '/fixtures/config.yaml'))
 config.initFromFile()
 
 const { getTrader, TraderBot } = require('../lib/TraderBot')

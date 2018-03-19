@@ -2,9 +2,10 @@ const test = require('ava');
 const portfolioManager = require('../lib/PortfolioManager')
 const extend = require('lodash/extend')
 const config = require('../lib/ConfigProvider')
+const path = require('path')
 
 test.beforeEach(t => {
-    config._setConfigPath('./test/fixtures/config.yaml')
+    config._setConfigPath(path.join(__dirname, '/fixtures/config.yaml'))
     config.initFromFile()
     portfolioManager.setAccount({ currency: 'USD', available: 10 })
     t.context.manager = portfolioManager

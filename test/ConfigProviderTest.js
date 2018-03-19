@@ -18,6 +18,8 @@ let defaults =  {
 }
 
 test('Config initializes from a config.yaml file', t => {
+	console.log(configPath)
+	
 	config._setConfigPath(configPath)
 	config.initFromFile()
 	t.is(config.get('product'), 'LTC-USD')
