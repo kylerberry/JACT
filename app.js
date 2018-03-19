@@ -1,88 +1,92 @@
 'use strict';
 const app = require('express')()
-const config = require('./lib/config')
+const find = require('lodash/find')
+const config = require('./lib/ConfigProvider')
 const HistoricDataProvider = require('./lib/HistoricDataProvider')
-
-const { gdax, DANGER_LIVE_GDAX_DANGER } = require('./lib/gdax')
-
-const Strategy = require('./lib/Strategy')
-const PortfolioManager = require('./lib/PortfolioManager')
-const TraderBot = require('./lib/TraderBot')
+const { gdax } = require('./lib/gdax')
+const strategy = require('./lib/Strategy')()
+const manager = require('./lib/PortfolioManager')
+const { getTrader, TraderBot } = require('./lib/TraderBot')
 const FeedService = require('./lib/FeedService')
+const configRoute = require('./api/routes/config');
 
-let Spinner = require('cli-spinner').Spinner
-let spinner = new Spinner('working... %s')
-spinner.setSpinnerString(0);
+// connect routes
+app.use('/config', configRoute);
+
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+	var err = new Error('Not Found');
+	err.status = 404;
+	next(err);
+});
+
+// error handler
+app.use(function (err, req, res, next) {
+	// render the error message
+	res.status(err.status || 500);
+	res.json({ error: err.message });
+});
 
 const server = app.listen(process.env.PORT, () => {
     console.log(`>> JACT running on port ${server.address().port}\n`)
 
     /**
      * Bootstraps the portfolio manager
-     * @param {Object} options 
+     * @param {Object} options
      * @return {Promise}
      */
     async function initPortfolioManagerAsync(options) {
         const accounts = await gdax.getAccounts()
             .catch(err => { throw new Error(err) })
-            if (accounts.message) {
-                throw new Error(accounts.message)
-            }
-        return new PortfolioManager(accounts, options)
+
+        if (accounts.message) {
+            throw new Error(accounts.message)
+        }
+
+        // return usd account only
+        manager.setAccount(find(accounts, { currency: options.product.split('-')[1] }))
     }
 
     /**
      * Bootstraps the Data Provider
-     * @param {Object} options 
+     * @param {Object} options
      * @return {Promise}
      */
     async function initHistoricDataAsync(options) {
-        const data = await DANGER_LIVE_GDAX_DANGER.getProductHistoricRates(options.product, { granularity: options.granularity })
+        const data = await gdax.getProductHistoricRates(options.product, { granularity: options.granularity })
             .catch(err => { throw new Error(err) })
-            if (data.message) {
-                throw new Error(data.message)
-            }
-            HistoricDataProvider.connect(data)
+		if (data.message) {
+			throw new Error(data.message)
+		}
+		HistoricDataProvider.connect(data)
     }
 
     /**
      * Bootstraps the TraderBot with the Strategy and PortfolioManager
-     * @param {} options 
+     * @param {Object} options
      * @return void
      */
     async function initTraderBotAsync(options) {
         try {
             console.log('>> Fetching account information.')
-            spinner.start()
-            const manager = await initPortfolioManagerAsync(options)
-            spinner.stop(true)
+            await initPortfolioManagerAsync(options)
 
             console.log('>> Fetching historical data.')
-            spinner.start()
             await initHistoricDataAsync(options)
-            spinner.stop(true)
-            
-            console.log('>> Connecting to realtime feed. This may take a few moments.')
-            spinner.start()
-            await FeedService.connect().catch(err => { throw new Error(err) })
-            spinner.stop(true)
 
-            let strategy = new Strategy(options)
+            console.log('>> Connecting to realtime feed. This may take a few moments.')
+            await FeedService.connect().catch(err => { throw new Error(err) })
+
+            strategy.set(options.strategy)
             console.log('>> Strategy initialized.\n')
 
-            const bot = new TraderBot({
-                strategy,
-                manager,
-                options
-            })
-
+            const bot = getTrader()
             bot.startTrading()
         } catch (err) {
-            spinner.stop(true)
             console.log(`>> ${err}`)
             process.exit()
         }
     }
 
-    initTraderBotAsync(config)
+	initTraderBotAsync(config.get())
 })

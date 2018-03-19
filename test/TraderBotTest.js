@@ -1,61 +1,36 @@
 const test =  require('ava');
-const TraderBot = require('../lib/TraderBot')
-const PortfolioManager = require('../lib/PortfolioManager')
-const Strategy = require('../lib/Strategy')
+const config = require('../lib/ConfigProvider')
+const path = require('path')
+
+// gdax calls config really early
+config._setConfigPath(path.join(__dirname, '/fixtures/config.yaml'))
+config.initFromFile()
+
+const { getTrader, TraderBot } = require('../lib/TraderBot')
+const portfolioManager = require('../lib/PortfolioManager')
+const strategy = require('../lib/Strategy')()
 const CandleProvider = require('../lib/CandleProvider')
-const extend = require('lodash/extend')
 const sinon = require('sinon')
 
-// @TODO look into using macros to reproduce some functionality
-// @TODO maybe break some tests into smaller units
-
-// mock Strategy
-const getStrategyInstance = (params = {}) => {
-	let defaultOptions = {
-		strategy: 'macd'
-	}
-	let options = extend({}, params, defaultOptions);
-	return new Strategy(options)
-}
-
-// mock Manager
-const getManagerInstance = (params = {}) => {
-	let defaultAccounts = [{ currency: 'USD' }, { currency: 'LTC' }]
-	let defaultOptions = { product: 'LTC-USD' }
-
-	let accounts = params.accounts ? params.accounts : defaultAccounts;
-	let options = extend({}, params.options, defaultOptions);
-
-	return new PortfolioManager(accounts, options)
-}
-
-// mock Trader
-const getTraderInstance = (params = {}) => {
-	let defaultOptions = {
-		product: 'LTC-USD',
-		logging: false
-	}
-
-	let options = extend({}, params.options, defaultOptions);
-	let strategy = getStrategyInstance(options)
-	let manager = getManagerInstance(params)
-
-	let trader = new TraderBot({strategy, manager, options})
-	// mock place order
-	trader.placeOrder = sinon.spy()
-	return trader
-}
-
-test('TraderBot initializes', t => {
-    const trader = getTraderInstance()
-    t.is(trader instanceof TraderBot, true)
+test.beforeEach(t => {
+	portfolioManager.setAccount({ currency: 'USD', available: 10 })
+	t.context.manager = portfolioManager
+	t.context.trader = new TraderBot()
 })
 
-test('stopLosses', t => {
-	const trader = getTraderInstance()
+test('getTrader should return the existing instance', t => {
+	// they are same instance
+	const trader = getTrader()
+	t.is(trader, t.context.trader)
+})
+
+test('stopLosses ', t => {
+	const trader = t.context.trader
+	const manager = t.context.manager
+	trader.placeOrder = sinon.spy()
 
 	// a filled buy
-	trader.manager.addFilled({
+	manager.addFilled({
 		side: 'buy',
 		size: '1.5',
 		price: 190
@@ -66,7 +41,7 @@ test('stopLosses', t => {
 	t.true(trader.placeOrder.calledOnce)
 
 	// a filled sell (no remaining position)
-	trader.manager.addFilled({
+	manager.addFilled({
 		side: 'sell',
 		size: '1.5',
 		price: 190
@@ -77,15 +52,14 @@ test('stopLosses', t => {
 	// doesn't place the order
 	t.is(trader.placeOrder.callCount, 1)
 
-
-	trader.manager.addFilled({
+	manager.addFilled({
 		side: 'buy',
 		size: '.5',
 		price: 190
 	})
 
 	// signal sell, and order opened but unfulfilled
-	trader.manager.addOpen({
+	manager.addOpen({
 		order_id: 123,
 		side: 'sell',
 		size: '.2',
@@ -99,7 +73,8 @@ test('stopLosses', t => {
 })
 
 test('openHandler', t => {
-	let trader = getTraderInstance()
+	let trader = t.context.trader
+	const manager = t.context.manager
 
 	// 'open' event comes down the feed
 	trader.orderPlaced = true
@@ -110,7 +85,7 @@ test('openHandler', t => {
 		size: '1.5'
 	})
 
-	t.is(trader.manager.getOpen(123).price, 129)
+	t.is(manager.getOpen(123).price, 129)
 
 	// if an externally placed order (manually through gdax web ui)
 	// ignore the event
@@ -122,11 +97,12 @@ test('openHandler', t => {
 		size: '1.5'
 	})
 
-	t.falsy(trader.manager.getOpen(999))
+	t.falsy(manager.getOpen(999))
 })
 
 test('matchHandler', t => {
-	let trader = getTraderInstance()
+	let trader = t.context.trader
+	const manager = t.context.manager
 
 	// 'match' event comes down the feed
 	trader.orderPlaced = true
@@ -136,7 +112,7 @@ test('matchHandler', t => {
 		price: 129,
 		size: '1.5'
 	})
-	t.is(trader.manager.getRemainingPositionSize(), 1.5)
+	t.is(manager.getRemainingPositionSize(), 1.5)
 
 	// if an externally placed order (manually through gdax web ui)
 	// ignore the event
@@ -147,7 +123,7 @@ test('matchHandler', t => {
 		price: 129,
 		size: '1.5'
 	})
-	t.is(trader.manager.getRemainingPositionSize(), 1.5)
+	t.is(manager.getRemainingPositionSize(), 1.5)
 
 	// sell match trade removes out existing position
 	trader.orderPlaced = true
@@ -157,15 +133,15 @@ test('matchHandler', t => {
 		price: 129,
 		size: '1.5'
 	})
-	t.is(trader.manager.getRemainingPositionSize(), 0)
+	t.is(manager.getRemainingPositionSize(), 0)
 })
 
 test('doneHandler', t => {
-	let trader = getTraderInstance()
+	const trader = t.context.trader
+	const manager = t.context.manager
 
 	// completely filled buy
 	trader.orderPlaced = true
-	trader.manager.removeOpen = sinon.spy()
 	trader.resetFlags = sinon.spy()
 	trader.doneHandler({
 		order_id: 123,
@@ -175,11 +151,15 @@ test('doneHandler', t => {
 		remaining_size: '0',
 		reason: 'filled'
 	})
-	t.truthy(trader.manager.removeOpen.withArgs(123).calledOnce)
+	t.is(typeof manager.getOpen(123), 'undefined')
 	t.truthy(trader.resetFlags.calledOnce)
 
 	// ignored if fired from external event
 	trader.orderPlaced = false
+	// hacky test, workaround for unable to spy on removeOpen
+	manager.addOpen({
+		order_id: 234
+	})
 	trader.doneHandler({
 		order_id: 234,
 		side: 'buy',
@@ -189,10 +169,24 @@ test('doneHandler', t => {
 		reason: 'filled'
 	})
 	// removeOpen was not called again
-	t.is(trader.manager.removeOpen.callCount, 1)
+	t.truthy(manager.getOpen(234))
+
+	// test not run if stop loss is triggered
+	trader.orderPlaced = true
+	trader.stopLossTriggered = true
+	trader.doneHandler({
+		order_id: 234,
+		side: 'buy',
+		price: 129,
+		size: '1.5',
+		remaining_size: '0',
+		reason: 'filled'
+	})
+	t.truthy(manager.getOpen(234))
 
 	// partially filled sell
 	trader.orderPlaced = true
+	trader.placeOrder = sinon.spy()
 	trader.shouldReplaceOrder = () => true
 	trader.doneHandler({
 		order_id: 345,
@@ -213,7 +207,8 @@ test('doneHandler', t => {
 })
 
 test('shouldReplaceOrder', t => {
-	let trader = getTraderInstance()
+	let trader = t.context.trader
+	const manager = t.context.manager
 
 	let cancelledSell = {
 		side: 'sell',
@@ -221,7 +216,7 @@ test('shouldReplaceOrder', t => {
 		reason: 'canceled'
 	}
 
-	trader.manager.isBidAllowed = () => true
+	manager.isBidAllowed = () => true
 	t.truthy(trader.shouldReplaceOrder(cancelledSell, 100))
 
 	let cancelledBuy = {
@@ -253,6 +248,6 @@ test('shouldReplaceOrder', t => {
 	t.truthy(trader.shouldReplaceOrder(filledPartialSell, 100))
 
 	// canceled buy but bid is not allowed
-	trader.manager.isBidAllowed = () => false
+	manager.isBidAllowed = () => false
 	t.falsy(trader.shouldReplaceOrder(cancelledBuy, 100))
 })
