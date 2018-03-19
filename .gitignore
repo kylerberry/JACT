@@ -3,7 +3,7 @@
 .nyc_output
 coverage
 node_modules
-config.yaml
+/config.yaml
 todo.txt
 lib/strategies/private.*.js
 backtest_results
