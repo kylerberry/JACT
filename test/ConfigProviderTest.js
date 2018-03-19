@@ -1,7 +1,8 @@
 const test = require('ava');
 const config = require('../lib/ConfigProvider')
+const path = require('path')
 
-let configPath = './test/fixtures/config.yaml'
+let configPath = path.join(__dirname, '/fixtures/config.yaml')
 
 let defaults =  {
 	gdax_auth_secret: 'someSecret',
