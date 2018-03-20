@@ -251,3 +251,31 @@ test('shouldReplaceOrder', t => {
 	manager.isBidAllowed = () => false
 	t.falsy(trader.shouldReplaceOrder(cancelledBuy, 100))
 })
+
+test('perform order if remaining size is less than .1', t => {
+	let trader = t.context.trader
+	const manager = t.context.manager
+
+	let fills = [{
+		side: 'buy',
+		remaining_size: '1',
+		reason: 'filled'
+	},
+	{
+		side: 'sell',
+		remaining_size: '0.95',
+		reason: 'filled'
+	}]
+
+	fills.forEach(fill => manager.addFilled(fill))
+
+	trader.placeOrder = sinon.spy()
+	// if remaining size is less than .1 don't sell
+	trader.shortPosition()
+	t.falsy(trader.placeOrder.calledOnce)
+
+	// can buy if remaining position is greater than .1
+	trader.longPosition()
+	t.truthy(trader.placeOrder.calledOnce)
+
+})
