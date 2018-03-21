@@ -279,3 +279,17 @@ test('perform order if remaining size is less than minimumSize', t => {
  	t.truthy(trader.placeOrder.calledOnce)
 
 })
+
+test('cannot place signaled orders while feed order is unresolved', t => {
+	const trader = t.context.trader
+	const manager = t.context.manager
+
+	trader.placeOrder = sinon.spy()
+	trader.ordersResolved = false
+	trader.shortPosition()
+	t.falsy(trader.placeOrder.calledOnce)
+
+	trader.longPosition()
+	t.falsy(trader.placeOrder.calledOnce)
+
+})
