@@ -112,7 +112,7 @@ test('matchHandler', t => {
 		price: 129,
 		size: '1.5'
 	})
-	t.is(manager.getRemainingPositionSize(), 1.5)
+	t.is(manager.getPositionSize(), 1.5)
 
 	// if an externally placed order (manually through gdax web ui)
 	// ignore the event
@@ -123,7 +123,7 @@ test('matchHandler', t => {
 		price: 129,
 		size: '1.5'
 	})
-	t.is(manager.getRemainingPositionSize(), 1.5)
+	t.is(manager.getPositionSize(), 1.5)
 
 	// sell match trade removes out existing position
 	trader.orderPlaced = true
@@ -133,7 +133,7 @@ test('matchHandler', t => {
 		price: 129,
 		size: '1.5'
 	})
-	t.is(manager.getRemainingPositionSize(), 0)
+	t.is(manager.getPositionSize(), 0)
 })
 
 test('doneHandler', t => {
@@ -250,4 +250,32 @@ test('shouldReplaceOrder', t => {
 	// canceled buy but bid is not allowed
 	manager.isBidAllowed = () => false
 	t.falsy(trader.shouldReplaceOrder(cancelledBuy, 100))
+})
+
+test('perform order if remaining size is less than minimumSize', t => {
+	let trader = t.context.trader
+	const manager = t.context.manager
+		
+	let fills = [{
+ 		side: 'buy',
+		size: '1',
+		reason: 'filled'
+	},
+	{
+		side: 'sell',
+		size: '0.95',
+		reason: 'filled'
+	}]
+
+	fills.forEach(fill => manager.addFilled(fill))
+
+	trader.placeOrder = sinon.spy()
+	// if remaining size is less than .1 don't sell
+	trader.shortPosition()
+ 	t.falsy(trader.placeOrder.calledOnce)
+
+	// can buy if remaining position is greater than .1
+	trader.longPosition()
+ 	t.truthy(trader.placeOrder.calledOnce)
+
 })

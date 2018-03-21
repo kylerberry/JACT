@@ -118,7 +118,7 @@ test('avgLoss for partially filled trades', t => {
     t.is(losses.percent, '-0.1700')
 })
 
-test('getRemainingPositionSize', t => {
+test('getPositionSize', t => {
     let manager = t.context.manager
 
     manager.addFilled({
@@ -126,21 +126,21 @@ test('getRemainingPositionSize', t => {
         size: '1',
         price: '100'
     })
-    t.is(manager.getRemainingPositionSize(), 1)
+    t.is(manager.getPositionSize(), 1)
 
     manager.addFilled({
         side: 'sell',
         size: '.3',
         price: '110',
     })
-    t.is(manager.getRemainingPositionSize(), .7)
+    t.is(manager.getPositionSize(), .7)
 
     manager.addFilled({
         side: 'sell',
         size: '.7',
         price: '110',
     })
-    t.is(manager.getRemainingPositionSize(), 0)
+    t.is(manager.getPositionSize(), 0)
 })
 
 test('shouldTriggerStop', t => {
