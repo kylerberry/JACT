@@ -2,8 +2,11 @@
 const app = require('express')()
 const find = require('lodash/find')
 const config = require('./lib/ConfigProvider')
+
+config.readConfig()
+
 const HistoricDataProvider = require('./lib/HistoricDataProvider')
-const { gdax } = require('./lib/gdax')
+const { gdax } = require('./lib/gdax')()
 const strategy = require('./lib/Strategy')()
 const manager = require('./lib/PortfolioManager')
 const { getTrader, TraderBot } = require('./lib/TraderBot')

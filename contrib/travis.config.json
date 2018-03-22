@@ -1,0 +1,15 @@
+
+{
+  "gdax_auth_key": "someKey",
+  "gdax_auth_secret": "someSecret",
+  "gdax_auth_passphrase": "somePassphrase",
+
+  "strategy": "macd",
+  "granularity": 900,
+  "product": "LTC-USD",
+  "stop_loss": 0.05,
+  "allowed_slippage": 0.01,
+  "max_funds": 500,
+  "logging": "false"
+}
+
