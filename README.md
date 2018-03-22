@@ -18,14 +18,14 @@ If a LONG order is canceled, JACT will continue placing best possible orders unt
 if a SHORT order is canceled or partially filled, JACT will continue placing best possible orders until the current position is closed entirely.
 
 #### Stop Loss
-JACT will constantly monitor the current price and compare it against any open position. If the current price falls below the `config.stopLoss` percentage it will immediately place a market sell order (has taker fee)
+JACT will constantly monitor the current price and compare it against any open position. If the current price falls below the `config.stop_loss` percentage it will immediately place a market sell order (has taker fee)
 
 #### Backtesting
-JACT has a basic backtesting feature. You can test your strategy against historical data of the dates you provide in `config.backtest.startDate` & `config.backtest.endDate`. Additionally, if you provide a `config.backtest.slippage`, the backtest will apply a random slippage percentage no greater than the percentage provided to ~50% of all buy orders. Although it's not entirely accurate, it adds some noise to simulate market chaos.
+JACT has a basic backtesting feature. The config for the backtest can be altered in `backtest.config.json`. You can test your strategy against historical data of the dates you provide in `start_date` & `end_date`. Additionally, if you provide a `slippage` value, the backtest will apply a random slippage percentage no greater than the percentage provided to ~50% of all buy orders. Although it's not entirely accurate, it adds some noise to simulate market chaos.
 
 ### How to: Install
 - `npm install`
-- configure `config.yaml` _*see sample.config.yaml*_
+- configure `config.json` _*see sample.config.json*_
 
 ### How to: Trade
 _*JACT is in early development. You may experience bugs. TRADE AT YOUR OWN RISK*
@@ -34,7 +34,7 @@ _*JACT is in early development. You may experience bugs. TRADE AT YOUR OWN RISK*
 
 ### How to: Backtest
 
-- configure `config.yaml` _*see sample.config.yaml*_
+- configure `backtest.config.json`
 - `npm run backtest`
 
 ### Todo

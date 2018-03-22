@@ -1,0 +1,13 @@
+{
+    "gdax_auth_key" : "da237c3c020883d882966c1e107a9bab",
+    "gdax_auth_secret" : "Pkeodq0H5BfpxJBYRX8b97woyFkwO0F1ixnsyub13iMYwzirHK3sidzCZOaAENMZ2/6njY9tBYVWppSaBVuqIQ==",
+    "gdax_auth_passphrase" : "kf8twtio5jo",
+
+    "strategy" : "private.macd_stoch",
+    "granularity" : 900,
+    "product" : "LTC-USD",
+    "stop_loss" : 0.05,
+    "allowed_slippage" : 0.007,
+    "max_funds" : 500,
+    "logging" : true
+}

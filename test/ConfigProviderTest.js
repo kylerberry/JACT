@@ -2,7 +2,7 @@ const test = require('ava');
 const config = require('../lib/ConfigProvider')
 const path = require('path')
 
-let configPath = path.join(__dirname, '/fixtures/config.yaml')
+let configPath = path.join(__dirname, '/fixtures/config.json')
 
 let defaults =  {
 	gdax_auth_secret: 'someSecret',
@@ -17,9 +17,8 @@ let defaults =  {
 	logging: false
 }
 
-test('Config initializes from a config.yaml file', t => {	
-	config._setConfigPath(configPath)
-	config.initFromFile()
+test('Config initializes from a config.json file', t => {	
+	config.readConfig(configPath)
 	t.is(config.get('product'), 'LTC-USD')
 })
 
