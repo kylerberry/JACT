@@ -5,8 +5,7 @@ const config = require('../lib/ConfigProvider')
 const path = require('path')
 
 test.beforeEach(t => {
-    config._setConfigPath(path.join(__dirname, '/fixtures/config.yaml'))
-    config.initFromFile()
+    config.readConfig(path.join(__dirname, '/fixtures/config.json'))
     portfolioManager.setAccount({ currency: 'USD', available: 10 })
     t.context.manager = portfolioManager
 })

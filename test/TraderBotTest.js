@@ -3,8 +3,7 @@ const config = require('../lib/ConfigProvider')
 const path = require('path')
 
 // gdax calls config really early
-config._setConfigPath(path.join(__dirname, '/fixtures/config.yaml'))
-config.initFromFile()
+config.readConfig(path.join(__dirname, '/fixtures/config.json'))
 
 const { getTrader, TraderBot } = require('../lib/TraderBot')
 const portfolioManager = require('../lib/PortfolioManager')
