@@ -36,7 +36,7 @@ test('Validate a config object', t => {
 
 test('Set config', t => {
 	//initial setup
-	config.set(config)
+	config.set(defaults)
 
 	// set by key, value
 	config.set('product', 'ETH-USD')

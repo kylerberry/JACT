@@ -10,5 +10,5 @@
   "stop_loss": 0.05,
   "allowed_slippage": 0.01,
   "max_funds": 500,
-  "logging": "false"
+  "logging": false
 }
